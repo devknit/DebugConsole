@@ -25,14 +25,9 @@ namespace DebugConsole
 			}
 			else if( count > ItemCount)
 			{
-				int addCount = count - ItemCount;
-				
-				for( int i0 = 0; i0 < addCount; i0++)
-				{
-					positions.Add( sizes.Sum() + sizes.Count * ElementSpace.y);
-					sizes.Add( ElementSize.y);
-				}
-				bForceScrollbarButtonUpdateCount = 2;
+				var values = new float[ count - ItemCount];
+				sizes.AddRange( values);
+				positions.AddRange( values);
 			}
 			base.ChangeItemCount( count);
 		}
@@ -46,21 +41,32 @@ namespace DebugConsole
 			base.Clear();
 		}
 		/**
-		 * \brief 1行(列)内の要素数を求める
-		 * return 要素数が返ります。
-		 */
-		protected override int OnCalculateLineCount()
-		{
-			return 1;
-		}
-		/**
 		 * \brief Content のサイズを求めます。
 		 * \return Conetnt のサイズが返ります。
 		 */
 		protected override Vector2 OnCalculateContentSize()
 		{
-			return new Vector2( 0, 
-				sizes.Sum() + (ItemCount - 1) * ElementSpace.y);
+			var ret = Vector2.zero;
+			
+			if( OnElementSize != null)
+			{
+				float size;
+				
+				for( int i0 = 0; i0 < ItemCount; ++i0)
+				{
+					size = OnElementSize( i0).y;
+					
+					if( i0 > 0)
+					{
+						ret.y += ElementSpace.y;
+					}
+					positions[ i0] = ret.y;
+					sizes[ i0] = size;
+					ret.y += size;
+				}
+				UpdateEnableElements();
+			}
+			return ret;
 		}
 		/**
 		 * \brief スクロール情報が変化した時に呼び出されます。
@@ -68,7 +74,7 @@ namespace DebugConsole
 		 */
 		protected override void OnMoveScrollEvent( Vector2 scrollPosition)
 		{
-			float p = rectTransform.localPosition.y;// * -1;
+			float p = contentTransform.localPosition.y;// * -1;
 			float q = p + viewportTransform.rect.height;
 			ToDisableVerticalOutsideElements( p, q);
 			ToEnableVerticalInsideElements( p, q);
@@ -86,7 +92,7 @@ namespace DebugConsole
 			
 			var rectTransform = elements.transform as RectTransform;
 			rectTransform.localPosition = new Vector3( x, y, 0.0f);
-			rectTransform.sizeDelta = new Vector2( ViewportSize.x, sizes[ index]);
+			rectTransform.sizeDelta = new Vector2( viewportSize.x, sizes[ index]);
 			
 			if( bEnabled == false)
 			{
@@ -114,7 +120,7 @@ namespace DebugConsole
 		}
 		void ToDisableVerticalOutsideElements( float viewTop, float viewBottom)
 		{
-			foreach( RectTransform child in rectTransform)
+			foreach( RectTransform child in contentTransform)
 			{
 				if( child.gameObject.activeSelf != false)
 				{
@@ -142,59 +148,17 @@ namespace DebugConsole
 				}
 			}
 		}
+	#if true
 		void LateUpdate()
 		{
-			if( bInitialized == false)
-			{
-				return;
-			}
-			
 			bool bResizing = false;
-			bool bRealign = false;
-			float offset = -1.0f;
-			float size;
-			int index = 0;
-			int i0;
 			
 			if( DetectViewportResizing() != false)
 			{
 				bResizing = true;
 			}
-			foreach( var elements in enableElements)
+			if( bResizing != false)
 			{
-				size = (elements.Value.transform as RectTransform).rect.height;
-				index = elements.Key;
-				
-				if( bResizing != false
-				||	sizes[ index] != size
-				||	elements.Value.Relocation != false)
-				{
-					elements.Value.Relocation = false;
-					if( offset < 0.0f)
-					{
-						for( i0 = 0, offset = 0.0f; i0 < index; i0++)
-						{
-							offset += sizes[ i0] + ElementSpace.y;
-						}
-					}
-					sizes[ index] = size;
-					bResizing = false;
-					bRealign = true;
-				}
-				if( bRealign != false)
-				{
-					positions[ index] = offset;
-					offset += sizes[ index] + ElementSpace.y;
-				}
-			}
-			if( bRealign != false)
-			{
-				for( i0 = index + 1; i0 < ItemCount; i0++)
-				{
-					positions[ i0] = offset;
-					sizes[ i0] = ElementSize.y;
-					offset += sizes[ i0] + ElementSpace.y;
-				}
 				CalculateContentSize();
 				bUpdateTransform = true;
 			}
@@ -203,26 +167,11 @@ namespace DebugConsole
 				OnMoveScrollEvent( scrollPosition);
 				bUpdateLocation = false;
 				bUpdateTransform = false;
-				
-				if( bForceScrollbarButtonUpdateCount > 0)
-				{
-					if( defaultScrollbarBottom != false)
-					{
-						if( scrollRect != null)
-						{
-							scrollRect.verticalNormalizedPosition = 0.0f;
-						}
-					}
-					bForceScrollbarButtonUpdateCount--;
-				}
 			}
 		}
-		
-		[SerializeField]
-		bool defaultScrollbarBottom = false;
+	#endif
 		
 		List<float> positions = new List<float>();
 		List<float> sizes = new List<float>();
-		int bForceScrollbarButtonUpdateCount;
 	}
 }

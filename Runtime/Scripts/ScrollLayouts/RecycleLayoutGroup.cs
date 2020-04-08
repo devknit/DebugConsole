@@ -18,19 +18,13 @@ namespace DebugConsole
 		{
 			get{ return itemCount; }
 		}
-		/**
-		 * \brief 1行(列)内の要素数
-		 */
-		public int LineElementCount
+		public RectTransform ContentTransform
 		{
-			get{ return lineElementCount; }
+			get{ return contentTransform; }
 		}
-		/**
-		 * \brief 要素のサイズ
-		 */
-		public Vector2 ElementSize
+		public RectTransform ViewportTransform
 		{
-			get{ return elementSize; }
+			get{ return viewportTransform; }
 		}
 		/**
 		 * \brief 要素同士の間隔
@@ -40,26 +34,14 @@ namespace DebugConsole
 			get{ return elementSpace; }
 		}
 		/**
-		 * \brief 次の要素までの距離
+		 * \brief 要素のサイズを求める時に呼び出されるコールバック
+		 * \param int [in] 要素のインデックス
+		 * \return 要素のサイズを返します。
 		 */
-		public Vector2 ElementAdvance
+		public Func<int, Vector2> OnElementSize
 		{
-			get{ return elementAdvance; }
-		}
-		/**
-		 * \brief Viewport のサイズ
-		 */
-		public Vector2 ViewportSize
-		{
-			get{ return viewportSize; }
-		}
-		/**
-		 * \brief 垂直方向のスクロール位置を 0 から 1 の間で表したもの。0 は下端を表します。
-		 */
-		public float VerticalNormalizedPosition
-		{
-			get{ return scrollRect.verticalNormalizedPosition; }
-			set{ scrollRect.verticalNormalizedPosition = value; }
+			get{ return onElementSize; }
+			set{ onElementSize = value; }
 		}
 		/**
 		 * \brief 要素が無効化された時に呼び出されるコールバック
@@ -81,6 +63,14 @@ namespace DebugConsole
 			set{ onEnableElements = value; }
 		}
 		/**
+		 * \brief 垂直方向のスクロール位置を 0 から 1 の間で表したもの。0 は下端を表します。
+		 */
+		public float VerticalNormalizedPosition
+		{
+			get{ return scrollRect.verticalNormalizedPosition; }
+			set{ scrollRect.verticalNormalizedPosition = value; }
+		}
+		/**
 		 * \brief 項目数を変更する
 		 * \param count [in] 項目数
 		 */
@@ -95,6 +85,7 @@ namespace DebugConsole
 					bUpdateLocation = true;
 				}
 				CalculateContentSize();
+				scrollRect.verticalNormalizedPosition = 0;
 			}
 		}
 		/**
@@ -104,11 +95,12 @@ namespace DebugConsole
 		{
 			RecycleElement[] enables = enableElements.Values.ToArray();
 			
-			for( int i0 = 0; i0 < enables.Length; i0++)
+			for( int i0 = 0; i0 < enables.Length; ++i0)
 			{
 				ToDisableElements( enables[ i0]);
 			}
 			itemCount = 0;
+			
 			CalculateContentSize();
 			
 			scrollPosition = new Vector2( 1.0f, 0.0f);
@@ -121,7 +113,7 @@ namespace DebugConsole
 		{
 			RecycleElement[] enables = enableElements.Values.ToArray();
 			
-			for( int i0 = 0; i0 < enables.Length; i0++)
+			for( int i0 = 0; i0 < enables.Length; ++i0)
 			{
 				ToDisableElements( enables[ i0]);
 			}
@@ -132,11 +124,6 @@ namespace DebugConsole
 		}
 		
 		/* please inherit and implement methods ---------------------------- */
-		/**
-		 * \brief 1行(列)内の要素数を求める
-		 * return 要素数が返ります。
-		 */
-		protected abstract int OnCalculateLineCount();
 		/**
 		 * \brief Content のサイズを求めます。
 		 * \return Conetnt のサイズが返ります。
@@ -161,23 +148,11 @@ namespace DebugConsole
 		
 		/* protected methods ----------------------------------------------- */
 		/**
-		 * \brief 1行(列)内の要素数を求める
-		 */
-		protected void CalculateLineCount()
-		{
-			lineElementCount = OnCalculateLineCount();
-			
-			if( lineElementCount < 1)
-			{
-				lineElementCount = 1;
-			}
-		}
-		/**
 		 * \brief Content のサイズを求めます。
 		 */
-		protected void CalculateContentSize()
+		public void CalculateContentSize()
 		{
-			rectTransform.sizeDelta = OnCalculateContentSize();
+			contentTransform.sizeDelta = OnCalculateContentSize();
 		}
 		/**
 		 * \brief Viewport のサイズ変更を検知する。
@@ -195,6 +170,13 @@ namespace DebugConsole
 				return true;
 			}
 			return false;
+		}
+		protected void UpdateEnableElements()
+		{
+			foreach( var element in enableElements)
+			{
+				OnUpdateElementTransform( element.Key, element.Value, true);
+			}
 		}
 		/**
 		 * \brief 要素を無効にする。
@@ -290,7 +272,7 @@ namespace DebugConsole
 		protected override void Awake()
 		{
 			base.Awake();
-			rectTransform = transform as RectTransform;
+			contentTransform = transform as RectTransform;
 			viewportTransform = transform.parent as RectTransform;
 		}
 		protected override void Start()
@@ -353,7 +335,7 @@ namespace DebugConsole
 		}
 		void OnCleaning( float elapsedSeconds)
 		{
-			if( autoCleanKeepCount * lineElementCount < disableElements.Count)
+			if( autoCleanKeepCount < disableElements.Count)
 			{
 				float limitTime = Time.realtimeSinceStartup + (elapsedSeconds / 60.0f);
 				RecycleElement elements;
@@ -361,7 +343,7 @@ namespace DebugConsole
 				
 				for( i0 = disableElements.Count - 1; i0 >= 0; i0--)
 				{
-					if( autoCleanKeepCount * lineElementCount >= disableElements.Count)
+					if( autoCleanKeepCount >= disableElements.Count)
 					{
 						break;
 					}
@@ -394,7 +376,7 @@ namespace DebugConsole
 			}
 			
 			/* ScrollRect の onValueChanged リスナーを登録する */
-			scrollRect = rectTransform.GetComponentInParent<ScrollRect>();
+			scrollRect = contentTransform.GetComponentInParent<ScrollRect>();
 			if( scrollRect != null)
 			{
 				scrollRect.onValueChanged.AddListener( OnScrollRectValueChanged);
@@ -416,14 +398,6 @@ namespace DebugConsole
 			
 			/* レイアウト計算のため以降は次のフレームへ */
 			yield return null;
-			
-			/* 次の要素までの距離を求める */
-			elementAdvance = new Vector2(
-				elementSize.x + elementSpace.x,
-				elementSize.y + elementSpace.y);
-			
-			/* 1行(列)内の要素数を求める */
-			CalculateLineCount();
 			
 			/* Content のサイズを求める */
 			CalculateContentSize();
@@ -460,9 +434,6 @@ namespace DebugConsole
 		/*!> 要素プレハブ */
 		[SerializeField]
 		GameObject elementPrefab = default;
-		/*!> 要素サイズ */
-		[SerializeField]
-		Vector2 elementSize = new Vector2( 32, 32);
 		/*!> 要素同士の間隔 */
 		[SerializeField]
 		Vector2 elementSpace = Vector2.zero;
@@ -481,7 +452,7 @@ namespace DebugConsole
 		/*!> 未使用状態の項目を退避させる親 */
 		Transform recycleTransform;
 		/*!> ContentのRectTransformキャッシュ */
-		protected RectTransform rectTransform;
+		protected RectTransform contentTransform;
 		/*!> ViewportのRectTransformキャッシュ */
 		protected RectTransform viewportTransform;
 		/*!> ScrollRectキャッシュ */
@@ -492,14 +463,10 @@ namespace DebugConsole
 		protected SortedDictionary<int, RecycleElement> enableElements;
 		/*!> 定期敵に未使用要素の破棄を行うコルーチン */
 		Coroutine cleaningCoroutine;
-		/*!> 1行(列)内の要素数 */
-		int lineElementCount = 1;
-		/*!> 次の行(列)までの距離 */
-		Vector2 elementAdvance;
 		/*!> スクロールオフセット */
 		protected Vector2 scrollPosition = new Vector2( 1.0f, 0.0f);
 		/*!> Viewportのサイズキャッシュ */
-		Vector2 viewportSize = Vector2.zero;
+		protected Vector2 viewportSize = Vector2.zero;
 		/*!> ToEnableElements() 呼び出し時に\n
 		 * 既に有効済みの要素の Transform も更新する
 		 */
@@ -511,6 +478,8 @@ namespace DebugConsole
 		/*!> 項目数 */
 		int itemCount;
 		
+		/*!> 要素のサイズを求める時のコールバック */
+		Func<int, Vector2> onElementSize;
 		/*!> 要素が無効になった時のコールバック */
 		Action<RecycleElement> onDisableElements;
 		/*!> 要素が有効になった時のコールバック */

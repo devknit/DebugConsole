@@ -4,7 +4,7 @@ using UnityEngine;
 
 namespace DebugConsole
 {
-	public sealed partial class GUI : MonoBehaviour
+	public sealed partial class Console : MonoBehaviour
 	{
 		public bool AddCommand( string name, Func<string, string[], string> func)
 		{
@@ -50,6 +50,7 @@ namespace DebugConsole
 			AddCommand( "ip", OnCommandIP);
 			AddCommand( "screen", OnCommandScreen);
 			AddCommand( "audio", OnCommandAudio);
+			AddCommand( "resize", OnCommandResize);
 		}
 		string OnCommandCommandList( string input, string[] args)
 		{
@@ -288,6 +289,50 @@ namespace DebugConsole
 			builder.AppendFormat( "  volume = {0},\n", AudioListener.volume);
 			builder.Append( "}");
 			return builder.ToString();
+		}
+		string OnCommandResize( string input, string[] args)
+		{
+			if( args.Length > 1)
+			{
+				switch( args[ 1])
+				{
+					case "-w":
+					case "-win":
+					case "-window":
+					{
+						//windowTransform.sizeDelta = new Vector2( 640, 480);
+						break;
+					}
+					case "-f":
+					case "-fnt":
+					case "-font":
+					{
+						int fontSize = textSettings.fontSize;
+						
+						if( args.Length > 2)
+						{
+							int size;
+							
+							if( int.TryParse( args[ 2], out size) != false)
+							{
+								fontSize = size;
+							}
+						}
+						else
+						{
+							fontSize = 24;
+						}
+						if( textSettings.fontSize != fontSize)
+						{
+							textSettings.fontSize = fontSize;
+							layout.CalculateContentSize();
+							layout.Flush();
+						}
+						break;
+					}
+				}
+			}
+			return string.Empty;
 		}
 	}
 }

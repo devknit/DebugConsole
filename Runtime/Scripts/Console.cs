@@ -6,11 +6,12 @@ using System.Collections.Generic;
 
 namespace DebugConsole
 {
-	public sealed partial class GUI : MonoBehaviour
+	public sealed partial class Console : MonoBehaviour
 	{
 		void Awake()
 		{
 			OnEntryDefaultCommands();
+			layout.OnElementSize = OnElementSize;
 			layout.OnEnableElements = OnEnableElements;
 			inputField?.onEndEdit.AddListener( OnEndEdit);
 			Application.logMessageReceivedThreaded += OnLogMessageReceived;
@@ -27,21 +28,6 @@ namespace DebugConsole
 				if( logs.Count != layout.ItemCount)
 				{
 					layout.ChangeItemCount( logs.Count);
-					forceDownScroll = true;
-					
-				}
-			}
-		}
-		bool forceDownScroll;
-		
-		void OnGUI()
-		{
-			if( Event.current.type == EventType.Repaint)
-			{
-				if( forceDownScroll != false)
-				{
-					layout.VerticalNormalizedPosition = 0.0f;
-					forceDownScroll = false;
 				}
 			}
 		}
@@ -93,16 +79,38 @@ namespace DebugConsole
 		{
 			if( string.IsNullOrEmpty( text) == false)
 			{
-				string[] lines = text.Split( new[]{ "\r\n", "\n", "\r"}, System.StringSplitOptions.None);
-				
-				lock( logs)
+				if( splitLines == false)
 				{
-					for( int i0 = 0; i0 < lines.Length; ++i0)
+					lock( logs)
 					{
-						logs.Add( new Log( lines[ i0], color));
+						logs.Add( new Log( text, color));
+					}
+				}
+				else
+				{
+					string[] lines = text.Split( new[]{ "\r\n", "\n", "\r"}, System.StringSplitOptions.None);
+					
+					lock( logs)
+					{
+						for( int i0 = 0; i0 < lines.Length; ++i0)
+						{
+							logs.Add( new Log( lines[ i0], color));
+						}
 					}
 				}
 			}
+		}
+		Vector2 OnElementSize( int index)
+		{
+			var generationSettings = textSettings.GetGenerationSettings( 
+				new Vector2( layout.ContentTransform.rect.width, 4096));
+			var ret = new Vector2( 0, 0);
+			
+			lock( logs)
+			{
+				ret = logs[ index].CalculateSize( generationSettings);
+			}
+			return ret;
 		}
 		void OnEnableElements( RecycleElement elements, System.Action callback)
 		{
@@ -112,7 +120,7 @@ namespace DebugConsole
 			{
 				log = logs[ elements.Index];
 			}
-			if( elements.GetComponent<Text>() is Text component)
+			if( elements.GetComponentInChildren<Text>() is Text component)
 			{
 				string text = log.text;
 				
@@ -121,8 +129,7 @@ namespace DebugConsole
 					text = text.Substring( 0, 14000);
 					text += "\n<message truncated>"; 
 				}
-				component.text = text;
-				component.color = log.color;
+				textSettings.ApplyComponent( component, text, log.color);
 			}
 			callback();
 		}
@@ -161,14 +168,15 @@ namespace DebugConsole
 			}
 		}
 		
-	//	[SerializeField]
-	//	CanvasScaler canvasScaler = default;
 		[SerializeField]
 		RecycleLayoutGroup layout = default;
 		[SerializeField]
 		InputField inputField = default;
 		
 		[SerializeField]
+		TextSettings textSettings = default;
+		[SerializeField]
+		bool splitLines = false;
 		Color logColor = new Color32( 200, 200, 200, 255);
 		[SerializeField]
 		Color warningColor = new Color32( 255, 204, 102, 255);
@@ -189,8 +197,17 @@ namespace DebugConsole
 		{
 			this.text = text;
 			this.color = color;
+			generator = new TextGenerator();
+		}
+		public Vector2 CalculateSize( TextGenerationSettings settings)
+		{
+			size.x = generator.GetPreferredWidth( text, settings);
+			size.y = generator.GetPreferredHeight( text, settings);
+			return size;
 		}
 		public string text;
 		public Color color;
+		public Vector2 size;
+		TextGenerator generator;
 	}
 }

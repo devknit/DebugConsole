@@ -26,6 +26,12 @@ namespace DebugConsole
 					float width = beginWidth + (position.x - pressPosition.x);
 					float height = beginHeight + (position.y - pressPosition.y);
 					
+					if( canvas.transform is RectTransform canvasTransform)
+					{
+						maximum = new Vector2( 
+							canvasTransform.sizeDelta.x - (window.offsetMin.x * 2.0f),
+							canvasTransform.sizeDelta.y - (window.offsetMin.y * 2.0f));
+					}
 					if( width < minimum.x)
 					{
 						width = minimum.x;
