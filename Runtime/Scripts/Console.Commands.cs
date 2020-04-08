@@ -40,11 +40,15 @@ namespace DebugConsole
 		}
 		void OnEntryDefaultCommands()
 		{
-			AddCommand( "cmd", OnCommandCommandList);
+			AddCommand( "list", OnCommandCommandList);
 			AddCommand( "clear", OnCommandClearConsole);
 			AddCommand( "clipboard", OnCommandClipboard);
+			AddCommand( "system", OnCommandSystemInfo);
 			AddCommand( "sys", OnCommandSystemInfo);
+			AddCommand( "application", OnCommandApplication);
 			AddCommand( "app", OnCommandApplication);
+			AddCommand( "paths", OnCommandPaths);
+			AddCommand( "memory", OnCommandMemoryStatus);
 			AddCommand( "mem", OnCommandMemoryStatus);
 			AddCommand( "gc", OnCommandGarbageCollection);
 			AddCommand( "ip", OnCommandIP);
@@ -190,6 +194,19 @@ namespace DebugConsole
 			builder.AppendFormat( "  unityVersion = {0},\n", Application.unityVersion);
 			builder.AppendFormat( "  version = {0},\n", Application.version);
 			builder.Append( "}");
+			return builder.ToString();
+		}
+		string OnCommandPaths( string input, string[] args)
+		{
+			var builder = new System.Text.StringBuilder();
+			builder.AppendLine( input);
+			builder.AppendFormat( "Application.consoleLogPath = {0},\n", Application.consoleLogPath);
+			builder.AppendFormat( "Application.dataPath = {0},\n", Application.dataPath);
+			builder.AppendFormat( "Application.persistentDataPath = {0},\n", Application.persistentDataPath);
+			builder.AppendFormat( "Application.streamingAssetsPath = {0},\n", Application.streamingAssetsPath);
+			builder.AppendFormat( "Application.temporaryCachePath = {0},\n", Application.temporaryCachePath);
+			builder.AppendFormat( "Caching.defaultCache.path = {0},\n", Caching.defaultCache.path);
+			builder.AppendFormat( "Caching.currentCacheForWriting.path = {0},\n", Caching.currentCacheForWriting.path);
 			return builder.ToString();
 		}
 		string OnCommandMemoryStatus( string input, string[] args)

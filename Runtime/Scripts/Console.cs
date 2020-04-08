@@ -143,13 +143,13 @@ namespace DebugConsole
 				{
 					System.Func<string, string[], string> func;
 					
-					string[] split = text.Split( ' ');
+					string[] args = text.Split( ' ');
 					
-					if( commands.TryGetValue( split[ 0], out func) != false)
+					if( commands.TryGetValue( args[ 0], out func) != false)
 					{
 						try
 						{
-							text = func( ">" + text, split);
+							text = func( ">" + text, args);
 						}
 						catch( System.Exception e)
 						{
