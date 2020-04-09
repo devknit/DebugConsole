@@ -57,6 +57,8 @@ namespace DebugConsole
 			AddCommand( "screen", OnCommandScreen);
 			AddCommand( "audio", OnCommandAudio);
 			AddCommand( "resize", OnCommandResize);
+			AddCommand( "sendlog", OnCommandSendLog);
+			AddCommand( "sl", OnCommandSendLog);
 		}
 		string OnCommandCommandList( string input, string[] args)
 		{
@@ -353,6 +355,32 @@ namespace DebugConsole
 							contentLayout.CalculateContentSize();
 							contentLayout.Flush();
 						}
+						break;
+					}
+				}
+			}
+			return string.Empty;
+		}
+		string OnCommandSendLog( string input, string[] args)
+		{
+			if( args.Length > 1)
+			{
+				switch( args[ 1])
+				{
+					case "-m":
+					case "-ml":
+					case "-mail":
+					{
+						var builder = new System.Text.StringBuilder();
+						
+						lock( logs)
+						{
+							foreach( var log in logs)
+							{
+								builder.AppendFormat( $"{log.text}%0d%0a");
+							}
+						}
+						Application.OpenURL( "mailto:?body=" + builder.ToString());
 						break;
 					}
 				}
