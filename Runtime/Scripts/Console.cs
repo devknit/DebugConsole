@@ -48,46 +48,13 @@ namespace DebugConsole
 		void OnLogMessageReceived( string condition, string stackTrace, LogType type)
 		{
 			string text = string.Format( "[{0}] {1}", System.DateTime.Now.ToLongTimeString(), condition);
-			var color = Color.white;
+			LogSetting logSetting = logTextSettings.GetLogSetting( type);
 			
-			if( type != LogType.Log)
+			if( logSetting.stackTrace != false)
 			{
 				text += System.Environment.NewLine + stackTrace;
 			}
-			switch( type)
-			{
-				case LogType.Log:
-				{
-					color = logTextSettings.normalColor;
-					break;
-				}
-				case LogType.Warning:
-				{
-					color = logTextSettings.warningColor;
-					break;
-				}
-				case LogType.Error:
-				{
-					color = logTextSettings.errorColor;
-					break;
-				}
-				case LogType.Assert:
-				{
-					color = logTextSettings.assertColor;
-					break;
-				}
-				case LogType.Exception:
-				{
-					color = logTextSettings.exceptionColor;
-					break;
-				}
-				default:
-				{
-					color = logTextSettings.normalColor;
-					break;
-				}
-			}
-			Append( text, color);
+			Append( text, logSetting.color);
 		}
 		void Append( string text, Color color)
 		{

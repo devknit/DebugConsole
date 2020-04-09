@@ -7,21 +7,73 @@ using System.Collections.Generic;
 namespace DebugConsole
 {
 	[System.Serializable]
+	internal sealed class LogSetting
+	{
+		public LogSetting( Color color, bool stackTrace)
+		{
+			this.color = color;
+			this.stackTrace = stackTrace;
+		}
+		[SerializeField]
+		internal Color color;
+		[SerializeField]
+		internal bool stackTrace;
+	}
+	[System.Serializable]
 	internal sealed class LogTextSettings : TextSettings
 	{
+		internal LogSetting GetLogSetting( LogType type)
+		{
+			LogSetting logSetting;
+			
+			switch( type)
+			{
+				case LogType.Log:
+				{
+					logSetting = normal;
+					break;
+				}
+				case LogType.Warning:
+				{
+					logSetting = warning;
+					break;
+				}
+				case LogType.Error:
+				{
+					logSetting = error;
+					break;
+				}
+				case LogType.Assert:
+				{
+					logSetting = assert;
+					break;
+				}
+				case LogType.Exception:
+				{
+					logSetting = exception;
+					break;
+				}
+				default:
+				{
+					logSetting = normal;
+					break;
+				}
+			}
+			return logSetting;
+		}
 		[HeaderAttribute("Log Text Settings")]
 		[SerializeField]
+		internal LogSetting normal = new LogSetting( new Color32( 200, 200, 200, 255), false);
+		[SerializeField]
+		internal LogSetting warning = new LogSetting( new Color32( 255, 204, 102, 255), true);
+		[SerializeField]
+		internal LogSetting error = new LogSetting( new Color32( 255, 102, 102, 255), true);
+		[SerializeField]
+		internal LogSetting assert = new LogSetting( new Color32( 255, 0, 0, 255), true);
+		[SerializeField]
+		internal LogSetting exception = new LogSetting( new Color32( 255, 0, 255, 255), true);
+		[SerializeField]
 		internal bool lineSplit = true;
-		[SerializeField]
-		internal Color normalColor = new Color32( 200, 200, 200, 255);
-		[SerializeField]
-		internal Color warningColor = new Color32( 255, 204, 102, 255);
-		[SerializeField]
-		internal Color errorColor = new Color32( 255, 102, 102, 255);
-		[SerializeField]
-		internal Color assertColor = new Color32( 255, 0, 0, 255);
-		[SerializeField]
-		internal Color exceptionColor = new Color32( 255, 0, 255, 255);
 	}
 	[System.Serializable]
 	public class TextSettings
