@@ -6,13 +6,15 @@ namespace DebugConsole
 {
 	public sealed partial class Console : MonoBehaviour
 	{
+		const char kCommandPrefix = ':';
+		
 		public bool AddCommand( string name, Func<string, string[], string> func)
 		{
 			if( string.IsNullOrEmpty( name) == false && func != null)
 			{
-				if( name[ 0] != '/')
+				if( name[ 0] != kCommandPrefix)
 				{
-					name = "/" + name;
+					name = kCommandPrefix + name;
 				}
 				if( commands.ContainsKey( name) == false)
 				{
@@ -26,9 +28,9 @@ namespace DebugConsole
 		{
 			if( string.IsNullOrEmpty( name) == false)
 			{
-				if( name[ 0] != '/')
+				if( name[ 0] != kCommandPrefix)
 				{
-					name = "/" + name;
+					name = kCommandPrefix + name;
 				}
 				if( commands.ContainsKey( name) == false)
 				{
@@ -236,6 +238,11 @@ namespace DebugConsole
 			builder.AppendLine( input);
 			
 			string hostname = System.Net.Dns.GetHostName();
+			
+			builder.Append( "[HostName] ");
+			builder.AppendLine( hostname);
+			
+		#if !UNITY_WEBGL || UNITY_EDITOR
 			var addresses = System.Net.Dns.GetHostAddresses( hostname);
 			
 			foreach( var address in addresses)
@@ -267,6 +274,7 @@ namespace DebugConsole
 				}
 				builder.AppendLine( address.ToString());
 			}
+		#endif
 			return builder.ToString();
 		}
 		string OnCommandScreen( string input, string[] args)

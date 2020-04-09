@@ -139,7 +139,7 @@ namespace DebugConsole
 			{
 				var color = Color.white;
 				
-				if( text[ 0] == '/')
+				if( text[ 0] == kCommandPrefix)
 				{
 					System.Func<string, string[], string> func;
 					
