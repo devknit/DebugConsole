@@ -54,6 +54,10 @@ namespace DebugConsole
 							height = maximum.y;
 						}
 					}
+					width = Mathf.Round( width);
+					height = Mathf.Round( height);
+					width -= width % 2;
+					height -= height % 2;
 					window.sizeDelta = new Vector2( width, height);
 				}
 			}

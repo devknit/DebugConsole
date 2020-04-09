@@ -11,10 +11,24 @@ namespace DebugConsole
 		void Awake()
 		{
 			OnEntryDefaultCommands();
-			layout.OnElementSize = OnElementSize;
-			layout.OnEnableElements = OnEnableElements;
+			contentLayout.OnElementSize = OnElementSize;
+			contentLayout.OnEnableElements = OnEnableElements;
 			inputField?.onEndEdit.AddListener( OnEndEdit);
 			Application.logMessageReceivedThreaded += OnLogMessageReceived;
+		}
+		void Start()
+		{
+			if( inputField != null && inputFieldFont != null)
+			{
+				if( inputField.placeholder is Text placeholder)
+				{
+					placeholder.font = inputFieldFont;
+				}
+				if( inputField.textComponent != null)
+				{
+					inputField.textComponent.font = inputFieldFont;
+				}
+			}
 		}
 		void OnDestroy()
 		{
@@ -25,9 +39,9 @@ namespace DebugConsole
 		{
 			lock( logs)
 			{
-				if( logs.Count != layout.ItemCount)
+				if( logs.Count != contentLayout.ItemCount)
 				{
-					layout.ChangeItemCount( logs.Count);
+					contentLayout.ChangeItemCount( logs.Count);
 				}
 			}
 		}
@@ -44,32 +58,32 @@ namespace DebugConsole
 			{
 				case LogType.Log:
 				{
-					color = logColor;
+					color = logTextSettings.normalColor;
 					break;
 				}
 				case LogType.Warning:
 				{
-					color = warningColor;
+					color = logTextSettings.warningColor;
 					break;
 				}
 				case LogType.Error:
 				{
-					color = errorColor;
+					color = logTextSettings.errorColor;
 					break;
 				}
 				case LogType.Assert:
 				{
-					color = assertColor;
+					color = logTextSettings.assertColor;
 					break;
 				}
 				case LogType.Exception:
 				{
-					color = exceptionColor;
+					color = logTextSettings.exceptionColor;
 					break;
 				}
 				default:
 				{
-					color = logColor;
+					color = logTextSettings.normalColor;
 					break;
 				}
 			}
@@ -79,7 +93,7 @@ namespace DebugConsole
 		{
 			if( string.IsNullOrEmpty( text) == false)
 			{
-				if( splitLines == false)
+				if( logTextSettings.lineSplit == false)
 				{
 					lock( logs)
 					{
@@ -102,8 +116,8 @@ namespace DebugConsole
 		}
 		Vector2 OnElementSize( int index)
 		{
-			var generationSettings = textSettings.GetGenerationSettings( 
-				new Vector2( layout.ContentTransform.rect.width, 4096));
+			var generationSettings = logTextSettings.GetGenerationSettings( 
+				new Vector2( contentLayout.ContentTransform.rect.width, 4096));
 			var ret = new Vector2( 0, 0);
 			
 			lock( logs)
@@ -129,7 +143,7 @@ namespace DebugConsole
 					text = text.Substring( 0, 14000);
 					text += "\n<message truncated>"; 
 				}
-				textSettings.ApplyComponent( component, text, log.color);
+				logTextSettings.ApplyComponent( component, text, log.color);
 			}
 			callback();
 		}
@@ -167,47 +181,53 @@ namespace DebugConsole
 				inputField.ActivateInputField();
 			}
 		}
-		
+	#if UNITY_EDITOR
+		[UnityEditor.MenuItem("GameObject/UI/Debug Console/Screen Space - Overlay", false, 10000)]
+		static void CreateWithOverlay()
+		{
+			Create( "3e5bdfe0eb6d38c4bb8c7ed1da393c63");
+		}
+		[UnityEditor.MenuItem("GameObject/UI/Debug Console/Screen Space - Camera", false, 10000)]
+		static void CreateWithCamera()
+		{
+			Create( "f103627363cd792419ae83183ad47cba");
+		}
+		static void Create( string guid)
+		{
+			string path = UnityEditor.AssetDatabase.GUIDToAssetPath( guid);
+			if( string.IsNullOrEmpty( path) == false)
+			{
+				if( UnityEditor.AssetDatabase.LoadAssetAtPath<GameObject>( path) is GameObject prefab)
+				{
+					GameObject newGameObject = GameObject.Instantiate( prefab);
+					newGameObject.name = "DebugConsole";
+					
+					if( newGameObject.GetComponent<Console>() is Console console)
+					{
+						Font font = Resources.GetBuiltinResource<Font>( "Arial.ttf");
+						console.logTextSettings.font = font;
+						console.inputFieldFont = font;
+					}
+				}
+			}
+		}
+		void Reset()
+		{
+			contentLayout = GetComponentInChildren<RecycleLayoutGroup>();
+			inputField = GetComponentInChildren<InputField>();
+		}
+	#endif
 		[SerializeField]
-		RecycleLayoutGroup layout = default;
+		RecycleLayoutGroup contentLayout = default;
 		[SerializeField]
 		InputField inputField = default;
-		
 		[SerializeField]
-		TextSettings textSettings = default;
+		Font inputFieldFont = default;
 		[SerializeField]
-		bool splitLines = false;
-		Color logColor = new Color32( 200, 200, 200, 255);
-		[SerializeField]
-		Color warningColor = new Color32( 255, 204, 102, 255);
-		[SerializeField]
-		Color errorColor = new Color32( 255, 102, 102, 255);
-		[SerializeField]
-		Color assertColor = new Color32( 255, 102, 102, 255);
-		[SerializeField]
-		Color exceptionColor = new Color32( 255, 102, 102, 255);
+		LogTextSettings logTextSettings = default;
 		
 		List<Log> logs = new List<Log>();
 		Dictionary<string, System.Func<string, string[], string>> commands = 
 			new Dictionary<string, System.Func<string, string[], string>>();
-	}
-	public class Log
-	{
-		public Log( string text, Color color)
-		{
-			this.text = text;
-			this.color = color;
-			generator = new TextGenerator();
-		}
-		public Vector2 CalculateSize( TextGenerationSettings settings)
-		{
-			size.x = generator.GetPreferredWidth( text, settings);
-			size.y = generator.GetPreferredHeight( text, settings);
-			return size;
-		}
-		public string text;
-		public Color color;
-		public Vector2 size;
-		TextGenerator generator;
 	}
 }

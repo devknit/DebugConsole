@@ -7,7 +7,24 @@ using System.Collections.Generic;
 namespace DebugConsole
 {
 	[System.Serializable]
-	public sealed class TextSettings
+	internal sealed class LogTextSettings : TextSettings
+	{
+		[HeaderAttribute("Log Text Settings")]
+		[SerializeField]
+		internal bool lineSplit = true;
+		[SerializeField]
+		internal Color normalColor = new Color32( 200, 200, 200, 255);
+		[SerializeField]
+		internal Color warningColor = new Color32( 255, 204, 102, 255);
+		[SerializeField]
+		internal Color errorColor = new Color32( 255, 102, 102, 255);
+		[SerializeField]
+		internal Color assertColor = new Color32( 255, 0, 0, 255);
+		[SerializeField]
+		internal Color exceptionColor = new Color32( 255, 0, 255, 255);
+	}
+	[System.Serializable]
+	public class TextSettings
 	{
 		public void Apply( TextGenerationSettings settings)
 		{
@@ -68,37 +85,38 @@ namespace DebugConsole
 			settings.updateBounds = updateBounds;
 			return settings;
 		}
+		[HeaderAttribute("Text Generation Settings")]
 		[SerializeField]
-		internal Font font = default;
+		public Font font = default;
 		[SerializeField]
-		internal FontStyle fontStyle = FontStyle.Normal;
+		public FontStyle fontStyle = FontStyle.Normal;
 		[SerializeField]
-		internal int fontSize = 24;
+		public int fontSize = 24;
 		[SerializeField]
-		internal float lineSpacing = 1.0f;
+		public float lineSpacing = 1.0f;
 		[SerializeField]
-		internal bool richText = true;
+		public bool richText = true;
 		[SerializeField]
-		internal TextAnchor textAnchor = TextAnchor.UpperLeft;
+		public TextAnchor textAnchor = TextAnchor.UpperLeft;
 		[SerializeField]
-		internal bool alignByGeometry = false;
+		public bool alignByGeometry = false;
 		[SerializeField]
-		internal HorizontalWrapMode horizontalOverflow = HorizontalWrapMode.Wrap;
+		public HorizontalWrapMode horizontalOverflow = HorizontalWrapMode.Wrap;
 		[SerializeField]
-		internal VerticalWrapMode verticalOverflow = VerticalWrapMode.Truncate;
+		public VerticalWrapMode verticalOverflow = VerticalWrapMode.Truncate;
 		[SerializeField]
-		internal bool resizeTextForBestFit = false;
+		public bool resizeTextForBestFit = false;
 		[SerializeField]
-		internal int resizeTextMinSize = 1;
+		public int resizeTextMinSize = 1;
 		[SerializeField]
-		internal int resizeTextMaxSize = 40;
+		public int resizeTextMaxSize = 40;
 		[SerializeField]
-		internal Vector2 pivot = Vector2.up;
+		public Vector2 pivot = Vector2.up;
 		[SerializeField]
-		internal float scaleFactor = 1.0f;
+		public float scaleFactor = 1.0f;
 		[SerializeField]
-		internal bool generateOutOfBounds = false;
+		public bool generateOutOfBounds = false;
 		[SerializeField]
-		internal bool updateBounds = false;
+		public bool updateBounds = false;
 	}
 }

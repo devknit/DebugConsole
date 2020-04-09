@@ -75,7 +75,7 @@ namespace DebugConsole
 			lock( logs)
 			{
 				logs.Clear();
-				layout.Clear();
+				contentLayout.Clear();
 			}
 			return string.Empty;
 		}
@@ -332,7 +332,7 @@ namespace DebugConsole
 					case "-fnt":
 					case "-font":
 					{
-						int fontSize = textSettings.fontSize;
+						int fontSize = logTextSettings.fontSize;
 						
 						if( args.Length > 2)
 						{
@@ -347,11 +347,11 @@ namespace DebugConsole
 						{
 							fontSize = 24;
 						}
-						if( textSettings.fontSize != fontSize)
+						if( logTextSettings.fontSize != fontSize)
 						{
-							textSettings.fontSize = fontSize;
-							layout.CalculateContentSize();
-							layout.Flush();
+							logTextSettings.fontSize = fontSize;
+							contentLayout.CalculateContentSize();
+							contentLayout.Flush();
 						}
 						break;
 					}
