@@ -33,9 +33,11 @@ namespace DebugConsole
 				}
 			}
 		}
-		public void AddCommand( string description, System.Func<Command.Context, bool> callback, params string[] names)
+		public void AddCommand( string description, System.Action<Command.Base> constructor, System.Func<Command.Context, bool> callback, params string[] names)
 		{
-			AddCommand( new Command.Callback( description, callback), names);
+			var command = new Command.Callback( description, callback);
+			constructor?.Invoke( command);
+			AddCommand( command, names);
 		}
 		public bool RemoveCommand( string name)
 		{
@@ -57,6 +59,7 @@ namespace DebugConsole
 		{
 			AddCommand(  
 				"コンソールのログをクリアします",
+				null,
 				(context) =>
 				{
 					lock( logs)
@@ -70,6 +73,7 @@ namespace DebugConsole
 			);
 			AddCommand(  
 				"コマンドヘルプ情報を表示します",
+				null,
 				(context) =>
 				{
 					var builder = new System.Text.StringBuilder();
