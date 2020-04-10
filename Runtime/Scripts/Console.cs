@@ -156,34 +156,8 @@ namespace DebugConsole
 				var color = logTextSettings.normal.color;
 				
 				Append( text, color);
+				OnCommands( text, color);
 				
-				if( text[ 0] == kCommandPrefix)
-				{
-					Command.Base command;
-					
-					string[] args = text.Remove( 0, 1).Split( ' ');
-					
-					if( commands.TryGetValue( args[ 0], out command) != false)
-					{
-						var context = new Command.Context( this, text, args);
-						try
-						{
-							if( command.Invoke( context) != false)
-							{
-								text = context.output;
-							}
-						}
-						catch( System.Exception e)
-						{
-							context.Output( e.ToString());
-						}
-						Append( context.output, color);
-					}
-					else
-					{
-						Append( "command not found.", color);
-					}
-				}
 				inputField.text = string.Empty;
 				inputField.ActivateInputField();
 			}
@@ -250,6 +224,5 @@ namespace DebugConsole
 		LogTextSettings logTextSettings = default;
 		
 		List<Log> logs = new List<Log>();
-		Dictionary<string, Command.Base> commands = new Dictionary<string, Command.Base>();
 	}
 }

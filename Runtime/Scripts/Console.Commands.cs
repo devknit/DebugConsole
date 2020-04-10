@@ -1,43 +1,41 @@
 ﻿
-using System;
 using UnityEngine;
+using System.Collections.Generic;
 
 namespace DebugConsole
 {
 	public sealed partial class Console : MonoBehaviour
 	{
-		public bool AddCommand( string name, Command.Base command)
+		public void AddCommand( Command.Base command, params string[] names)
 		{
-			if( string.IsNullOrEmpty( name) == false)
+			if( names?.Length > 0 && command?.IsValid() != false)
 			{
-				name = name.ToLower();
+				string preName = string.Join( ", ", names);
+				string name;
 				
-				if( command?.IsValid() != false)
+				if( preCommands.ContainsKey( preName) == false)
 				{
-					if( commands.ContainsKey( name) == false)
+					for( int i0 = 0; i0 < names.Length; ++i0)
 					{
-						commands.Add( name, command);
-						return true;
+						name = names[ i0];
+						
+						if( string.IsNullOrEmpty( name) == false)
+						{
+							name = name.ToLower();
+							
+							if( commands.ContainsKey( name) == false)
+							{
+								commands.Add( name, command);
+							}
+						}
 					}
+					preCommands.Add( preName, command.GetDescription( false));
 				}
 			}
-			return false;
 		}
-		public bool AddCommand( string name, string description, Func<Command.Context, bool> callback)
+		public void AddCommand( string description, System.Func<Command.Context, bool> callback, params string[] names)
 		{
-			if( string.IsNullOrEmpty( name) == false
-			&&	string.IsNullOrEmpty( description) == false
-			&&	callback != null)
-			{
-				name = name.ToLower();
-				
-				if( commands.ContainsKey( name) == false)
-				{
-					commands.Add( name, new Command.Callback( description, callback));
-					return true;
-				}
-			}
-			return false;
+			AddCommand( new Command.Callback( description, callback), names);
 		}
 		public bool RemoveCommand( string name)
 		{
@@ -57,7 +55,7 @@ namespace DebugConsole
 		}
 		void OnEntryDefaultCommands()
 		{
-			AddCommand( "clear", 
+			AddCommand(  
 				"コンソールのログをクリアします",
 				(context) =>
 				{
@@ -67,35 +65,66 @@ namespace DebugConsole
 						contentLayout.Clear();
 					}
 					return true;
-				}
+				},
+				"clear"
 			);
-			AddCommand( "help", 
+			AddCommand(  
 				"コマンドヘルプ情報を表示します",
 				(context) =>
 				{
 					var builder = new System.Text.StringBuilder();
 					
-					foreach( var command in commands)
+					foreach( var command in preCommands)
 					{
-						builder.AppendFormat( "{0}{2}{1}{2}",
-							command.Key, command.Value.GetDescription( false), System.Environment.NewLine);
+						builder.AppendFormat( "[{0}]{2}{1}",
+							command.Key, command.Value, System.Environment.NewLine);
 					}
 					context.Output( builder.ToString());
 					return true;
-				}
+				},
+				"help"
 			);
-			AddCommand( "systeminfo", new Command.SystemInfo());
-			AddCommand( "application", new Command.Application());
-			AddCommand( "paths", new Command.Paths());
-			AddCommand( "memorystatus", new Command.MemoryStatus());
-			AddCommand( "clipboard", new Command.Clipboard());
-			AddCommand( "gc", new Command.GarbageCollection());
-			AddCommand( "ip", new Command.InternetProtocol());
-			AddCommand( "screen", new Command.Screen());
-			AddCommand( "audio", new Command.Audio());
-			AddCommand( "sendlog", new Command.SendLog());
-			AddCommand( "resize", new Command.Resize());
+			AddCommand( new Command.SystemInfo(), "systeminfo", "system", "sys");
+			AddCommand( new Command.Application(), "application", "app");
+			AddCommand( new Command.Paths(), "paths");
+			AddCommand( new Command.MemoryStatus(), "memorystatus", "memory", "mem");
+			AddCommand( new Command.Clipboard(), "clipboard", "cb");
+			AddCommand( new Command.GarbageCollection(), "gc");
+			AddCommand( new Command.InternetProtocol(), "ip");
+			AddCommand( new Command.Screen(), "screen");
+			AddCommand( new Command.Audio(), "audio");
+			AddCommand( new Command.SendLog(), "sendlog", "send");
+			AddCommand( new Command.Resize(), "resize");
+		}
+		void OnCommands( string text, Color color)
+		{
+			if( text[ 0] == kCommandPrefix)
+			{
+				Command.Base command;
+				
+				string[] args = text.Remove( 0, 1).Split( ' ');
+				
+				if( commands.TryGetValue( args[ 0], out command) != false)
+				{
+					var context = new Command.Context( this, text, args);
+					try
+					{
+						command.Invoke( context);
+					}
+					catch( System.Exception e)
+					{
+						context.Output( e.ToString());
+					}
+					Append( context.output, color);
+				}
+				else
+				{
+					Append( "コマンドが見つかりません", color);
+				}
+			}
 		}
 		const char kCommandPrefix = ':';
+		Dictionary<string, Command.Base> commands = new Dictionary<string, Command.Base>();
+		Dictionary<string, string> preCommands = new Dictionary<string, string>();
 	}
 }

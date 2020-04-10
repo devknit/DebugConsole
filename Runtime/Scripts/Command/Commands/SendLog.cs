@@ -12,8 +12,10 @@ namespace DebugConsole.Command
 			if( context.argv.ContainsKey( "mail") != false)
 			{
 				UnityEngine.Application.OpenURL( "mailto:?body=" + context.console.GetLogString( "%0d%0a"));
+				return true;
 			}
-			return true;
+			context.Output( "引数が不足しています");
+			return false;
 		}
 	}
 }

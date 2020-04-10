@@ -47,6 +47,9 @@ namespace DebugConsole.Command
 			}	
 			if( ret == false)
 			{
+				context.Output( string.Format( 
+					"コマンドの処理に失敗しました{0}",
+					System.Environment.NewLine));
 				context.Output( GetDescription( true));
 			}
 			return ret;

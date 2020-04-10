@@ -35,6 +35,7 @@ namespace DebugConsole.Command
 					return true;
 				}
 			}
+			context.Output( "引数が不足しています");
 			return false;
 		}
 	}
