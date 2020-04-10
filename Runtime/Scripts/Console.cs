@@ -8,6 +8,67 @@ namespace DebugConsole
 {
 	public sealed partial class Console : MonoBehaviour
 	{
+		public string GetLogString( string newLine=null)
+		{
+			var builder = new System.Text.StringBuilder();
+			
+			if( string.IsNullOrEmpty( newLine) != false)
+			{
+				newLine = System.Environment.NewLine;
+			}
+			lock( logs)
+			{
+				foreach( var log in logs)
+				{
+					builder.AppendFormat( $"{log.text}{newLine}");
+				}
+			}
+			return builder.ToString();
+		}
+		public int ResizeLogFont( int fontSize)
+		{
+			if( fontSize < 8)
+			{
+				fontSize = 8;
+			}
+			if( fontSize > 300)
+			{
+				fontSize = 300;
+			}
+			if( logTextSettings.fontSize != fontSize)
+			{
+				logTextSettings.fontSize = fontSize;
+				contentLayout.CalculateContentSize();
+				contentLayout.Flush();
+			}
+			return fontSize;
+		}
+		public Vector2 ResizeLogWindow( Vector2 windowSize)
+		{
+			if( windowSize.x <= 0.0f)
+			{
+				windowSize.x = windowTransform.sizeDelta.x;
+			}
+			if( windowSize.y <= 0.0f)
+			{
+				windowSize.y = windowTransform.sizeDelta.y;
+			}
+			windowSize.x = Mathf.Round( windowSize.x);
+			windowSize.y = Mathf.Round( windowSize.y);
+			windowSize.x -= windowSize.x % 2.0f;
+			windowSize.y -= windowSize.y % 2.0f;
+			
+			if( windowSize.x < 160.0f)
+			{
+				windowSize.x = 160.0f;
+			}
+			if( windowSize.y < 120.0f)
+			{
+				windowSize.y = 120.0f;
+			}
+			windowTransform.sizeDelta = windowSize;
+			return windowSize;
+		}
 		void Awake()
 		{
 			OnEntryDefaultCommands();
@@ -118,32 +179,37 @@ namespace DebugConsole
 		{
 			if( string.IsNullOrEmpty( text) == false)
 			{
-				var color = Color.white;
+				var color = logTextSettings.normal.color;
+				
+				Append( text, color);
 				
 				if( text[ 0] == kCommandPrefix)
 				{
-					System.Func<string, string[], string> func;
+					Command.Base command;
 					
-					string[] args = text.Split( ' ');
+					string[] args = text.Remove( 0, 1).Split( ' ');
 					
-					if( commands.TryGetValue( args[ 0], out func) != false)
+					if( commands.TryGetValue( args[ 0], out command) != false)
 					{
+						var context = new Command.Context( this, text, args);
 						try
 						{
-							text = func( ">" + text, args);
+							if( command.Invoke( context) != false)
+							{
+								text = context.output;
+							}
 						}
 						catch( System.Exception e)
 						{
-							text = e.ToString();
+							context.Output( e.ToString());
 						}
-						ColorUtility.TryParseHtmlString( "#c8c8c8", out color);
+						Append( context.output, color);
 					}
 					else
 					{
-						text = ">" + text + "\n command not found.";
+						Append( "command not found.", color);
 					}
 				}
-				Append( text, color);
 				inputField.text = string.Empty;
 				inputField.ActivateInputField();
 			}
@@ -180,10 +246,26 @@ namespace DebugConsole
 		}
 		void Reset()
 		{
+			canvas = GetComponentInChildren<Canvas>();
+			canvasScaler = GetComponentInChildren<CanvasScaler>();
+			
+			if( GetComponentInChildren<CanvasRenderer>() is CanvasRenderer canvasRenderer)
+			{
+				if( canvasRenderer.transform is RectTransform rectTransform)
+				{
+					windowTransform = rectTransform;
+				}
+			}
 			contentLayout = GetComponentInChildren<RecycleLayoutGroup>();
 			inputField = GetComponentInChildren<InputField>();
 		}
 	#endif
+		[SerializeField]
+		Canvas canvas = default;
+		[SerializeField]
+		CanvasScaler canvasScaler = default;
+		[SerializeField]
+		RectTransform windowTransform = default;
 		[SerializeField]
 		RecycleLayoutGroup contentLayout = default;
 		[SerializeField]
@@ -194,7 +276,6 @@ namespace DebugConsole
 		LogTextSettings logTextSettings = default;
 		
 		List<Log> logs = new List<Log>();
-		Dictionary<string, System.Func<string, string[], string>> commands = 
-			new Dictionary<string, System.Func<string, string[], string>>();
+		Dictionary<string, Command.Base> commands = new Dictionary<string, Command.Base>();
 	}
 }

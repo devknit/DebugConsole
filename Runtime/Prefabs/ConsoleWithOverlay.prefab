@@ -44,6 +44,9 @@ MonoBehaviour:
   m_Script: {fileID: 11500000, guid: 632941dea579abd498fc2de19efde636, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
+  canvas: {fileID: 7650403048962383244}
+  canvasScaler: {fileID: 7650403048962383245}
+  windowTransform: {fileID: 7650403050289774827}
   contentLayout: {fileID: 7650403050164798097}
   inputField: {fileID: 6862287527161045979}
   inputFieldFont: {fileID: 0}

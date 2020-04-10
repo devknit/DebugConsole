@@ -143,7 +143,7 @@ namespace DebugConsole
 		[SerializeField]
 		public FontStyle fontStyle = FontStyle.Normal;
 		[SerializeField]
-		public int fontSize = 24;
+		public int fontSize = 14;
 		[SerializeField]
 		public float lineSpacing = 1.0f;
 		[SerializeField]
