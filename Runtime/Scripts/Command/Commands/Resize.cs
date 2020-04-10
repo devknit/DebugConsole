@@ -5,7 +5,8 @@ namespace DebugConsole.Command
 	{
 		public Resize() : base( "コンソールをリサイズします")
 		{
-			AddOption( "ログのフォントサイズを指定", 1, "font", "f");
+			AddOption( "ログのフォントサイズを指定", 1, "font", "fnt", "f");
+			AddOption( "ログのウィンドウサイズを指定", 2, "window", "win", "w");
 		}
 		protected override bool OnInvoke( Context context)
 		{
@@ -19,6 +20,18 @@ namespace DebugConsole.Command
 				{
 					fontSize = context.console.ResizeLogFont( fontSize);
 					context.Output( string.Format( $"コンソールのフォントサイズを{fontSize}に変更しました"));
+					return true;
+				}
+			}
+			if( context.argv.TryGetValue( "window", out values) != false)
+			{
+				UnityEngine.Vector2 windowSize;
+				
+				if( float.TryParse( values[ 0], out windowSize.x) != false
+				&&	float.TryParse( values[ 1], out windowSize.y) != false)
+				{
+					windowSize = context.console.ResizeLogWindow( windowSize);
+					context.Output( string.Format( $"コンソールのウィンドウサイズを{windowSize}に変更しました"));
 					return true;
 				}
 			}

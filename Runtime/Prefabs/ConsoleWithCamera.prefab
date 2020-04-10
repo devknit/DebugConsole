@@ -409,7 +409,7 @@ GameObject:
   - component: {fileID: 6862287526645922137}
   - component: {fileID: 6862287526645922116}
   - component: {fileID: 6862287526645922139}
-  - component: {fileID: 6862287526645922138}
+  - component: {fileID: 1163151818197219794}
   m_Layer: 5
   m_Name: ResizeTag
   m_TagString: Untagged
@@ -472,7 +472,7 @@ MonoBehaviour:
   m_FillOrigin: 0
   m_UseSpriteMesh: 0
   m_PixelsPerUnitMultiplier: 1
---- !u!114 &6862287526645922138
+--- !u!114 &1163151818197219794
 MonoBehaviour:
   m_ObjectHideFlags: 0
   m_CorrespondingSourceObject: {fileID: 0}
@@ -481,13 +481,40 @@ MonoBehaviour:
   m_GameObject: {fileID: 6862287526645922136}
   m_Enabled: 1
   m_EditorHideFlags: 0
-  m_Script: {fileID: 11500000, guid: 7b2b021e8e235b04da079f2999aba7eb, type: 3}
+  m_Script: {fileID: 11500000, guid: d0b148fe25e99eb48b9724523833bab1, type: 3}
   m_Name: 
   m_EditorClassIdentifier: 
-  canvas: {fileID: 7650403048962383244}
-  window: {fileID: 7650403050289774827}
-  minimum: {x: 160, y: 120}
-  maximum: {x: 1280, y: 720}
+  m_Delegates:
+  - eventID: 13
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1340358809449880034}
+          m_MethodName: OnBeginDrag
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
+  - eventID: 5
+    callback:
+      m_PersistentCalls:
+        m_Calls:
+        - m_Target: {fileID: 1340358809449880034}
+          m_MethodName: OnDrag
+          m_Mode: 0
+          m_Arguments:
+            m_ObjectArgument: {fileID: 0}
+            m_ObjectArgumentAssemblyTypeName: UnityEngine.Object, UnityEngine
+            m_IntArgument: 0
+            m_FloatArgument: 0
+            m_StringArgument: 
+            m_BoolArgument: 0
+          m_CallState: 2
 --- !u!1 &6862287527161045977
 GameObject:
   m_ObjectHideFlags: 0

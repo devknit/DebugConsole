@@ -96,46 +96,6 @@ namespace DebugConsole
 			AddCommand( "sendlog", new Command.SendLog());
 			AddCommand( "resize", new Command.Resize());
 		}
-		string OnCommandResize( string input, string[] args)
-		{
-			if( args.Length > 1)
-			{
-				switch( args[ 1])
-				{
-					case "-w":
-					case "-win":
-					case "-window":
-					{
-						//windowTransform.sizeDelta = new Vector2( 640, 480);
-						break;
-					}
-					case "-f":
-					case "-fnt":
-					case "-font":
-					{
-						int fontSize = logTextSettings.fontSize;
-						
-						if( args.Length > 2)
-						{
-							int size;
-							
-							if( int.TryParse( args[ 2], out size) != false)
-							{
-								fontSize = size;
-							}
-						}
-						else
-						{
-							fontSize = 24;
-						}
-						ResizeLogFont( fontSize);
-						
-						break;
-					}
-				}
-			}
-			return string.Empty;
-		}
 		const char kCommandPrefix = ':';
 	}
 }

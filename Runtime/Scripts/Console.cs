@@ -43,32 +43,6 @@ namespace DebugConsole
 			}
 			return fontSize;
 		}
-		public Vector2 ResizeLogWindow( Vector2 windowSize)
-		{
-			if( windowSize.x <= 0.0f)
-			{
-				windowSize.x = windowTransform.sizeDelta.x;
-			}
-			if( windowSize.y <= 0.0f)
-			{
-				windowSize.y = windowTransform.sizeDelta.y;
-			}
-			windowSize.x = Mathf.Round( windowSize.x);
-			windowSize.y = Mathf.Round( windowSize.y);
-			windowSize.x -= windowSize.x % 2.0f;
-			windowSize.y -= windowSize.y % 2.0f;
-			
-			if( windowSize.x < 160.0f)
-			{
-				windowSize.x = 160.0f;
-			}
-			if( windowSize.y < 120.0f)
-			{
-				windowSize.y = 120.0f;
-			}
-			windowTransform.sizeDelta = windowSize;
-			return windowSize;
-		}
 		void Awake()
 		{
 			OnEntryDefaultCommands();
