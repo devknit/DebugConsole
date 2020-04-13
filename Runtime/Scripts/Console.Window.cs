@@ -100,9 +100,7 @@ namespace DebugConsole
 					case RenderMode.ScreenSpaceCamera:
 					case RenderMode.WorldSpace:
 					{
-						var rectTransform = transform as RectTransform;
-						
-						if( camera == null || rectTransform == null)
+						if( camera == null)
 						{
 							local = Vector2.zero;
 							return false;

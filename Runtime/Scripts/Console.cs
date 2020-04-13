@@ -1,4 +1,12 @@
-﻿
+﻿#if !UNITY_EDITOR
+	#if UNITY_IOS
+		#define WITH_IOS
+	#endif
+	#if UNITY_ANDROID
+		#define WITH_ANDROID
+	#endif
+#endif
+
 using UnityEngine;
 using UnityEngine.UI;
 using System.Collections;
@@ -159,7 +167,9 @@ namespace DebugConsole
 				OnCommands( text, color);
 				
 				inputField.text = string.Empty;
+			#if !WITH_IOS && !WITH_ANDROID
 				inputField.ActivateInputField();
+			#endif
 			}
 		}
 	#if UNITY_EDITOR
