@@ -205,7 +205,7 @@ namespace DebugConsole
 		void Reset()
 		{
 			canvas = GetComponentInChildren<Canvas>();
-			canvasScaler = GetComponentInChildren<CanvasScaler>();
+//			canvasScaler = GetComponentInChildren<CanvasScaler>();
 			
 			if( GetComponentInChildren<CanvasRenderer>() is CanvasRenderer canvasRenderer)
 			{
@@ -220,8 +220,8 @@ namespace DebugConsole
 	#endif
 		[SerializeField]
 		Canvas canvas = default;
-		[SerializeField]
-		CanvasScaler canvasScaler = default;
+//		[SerializeField]
+//		CanvasScaler canvasScaler = default;
 		[SerializeField]
 		RectTransform windowTransform = default;
 		[SerializeField]
