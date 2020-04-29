@@ -90,6 +90,7 @@ namespace DebugConsole
 			);
 			AddCommand( new Command.SystemInfo(), "systeminfo", "system", "sys");
 			AddCommand( new Command.Application(), "application", "app");
+			AddCommand( new Command.FrameRate(), "framerate", "fps");
 			AddCommand( new Command.Paths(), "paths");
 			AddCommand( new Command.MemoryStatus(), "memorystatus", "memory", "mem");
 			AddCommand( new Command.Clipboard(), "clipboard", "cb");
@@ -106,7 +107,7 @@ namespace DebugConsole
 			{
 				Command.Base command;
 				
-				string[] args = text.Remove( 0, 1).Split( ' ');
+				string[] args = text.Trim().Remove( 0, 1).Split( ' ');
 				
 				if( commands.TryGetValue( args[ 0], out command) != false)
 				{
