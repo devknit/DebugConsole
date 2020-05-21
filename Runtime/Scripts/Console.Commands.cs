@@ -100,6 +100,7 @@ namespace DebugConsole
 			AddCommand( new Command.Audio(), "audio");
 			AddCommand( new Command.SendLog(), "sendlog", "send");
 			AddCommand( new Command.Resize(), "resize");
+			AddCommand( new Command.Shader(), "shader", "sh");
 		}
 		void OnCommands( string text, Color color)
 		{
