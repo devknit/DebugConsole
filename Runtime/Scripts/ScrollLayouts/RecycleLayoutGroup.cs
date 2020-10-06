@@ -44,6 +44,16 @@ namespace DebugConsole
 			set{ onElementSize = value; }
 		}
 		/**
+		 * \brief 要素のオフセットを求める時に呼び出されるコールバック
+		 * \param int [in] 要素のインデックス
+		 * \return 要素のオフセットを返します。
+		 */
+		public Func<int, Vector2> OnElementOffset
+		{
+			get{ return onElementOffset; }
+			set{ onElementOffset = value; }
+		}
+		/**
 		 * \brief 要素が無効化された時に呼び出されるコールバック
 		 * \param RecycleElement [in] 無効化された要素
 		 */
@@ -480,6 +490,8 @@ namespace DebugConsole
 		
 		/*!> 要素のサイズを求める時のコールバック */
 		Func<int, Vector2> onElementSize;
+		/*!> 要素のサイズを求める時のコールバック */
+		Func<int, Vector2> onElementOffset;
 		/*!> 要素が無効になった時のコールバック */
 		Action<RecycleElement> onDisableElements;
 		/*!> 要素が有効になった時のコールバック */

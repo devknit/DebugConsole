@@ -50,19 +50,20 @@ namespace DebugConsole
 			
 			if( OnElementSize != null)
 			{
-				float size;
+				Vector2 size, offset;
 				
 				for( int i0 = 0; i0 < ItemCount; ++i0)
 				{
-					size = OnElementSize( i0).y;
+					size = OnElementSize( i0);
+					offset = OnElementOffset?.Invoke( i0) ?? Vector2.zero;
 					
 					if( i0 > 0)
 					{
 						ret.y += ElementSpace.y;
 					}
-					positions[ i0] = ret.y;
-					sizes[ i0] = size;
-					ret.y += size;
+					positions[ i0] = ret.y + offset.y;
+					sizes[ i0] = size.y + offset.y;
+					ret.y += size.y + offset.y;
 				}
 				UpdateEnableElements();
 			}
